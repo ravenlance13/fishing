@@ -1,1 +1,89 @@
       
+ let userOptions = {};
+    let allowed = true;
+    let randomImageIndex = 0; // Store the index of the randomly selected image
+
+    window.addEventListener('onWidgetLoad', function (obj) {
+        userOptions = obj['detail']['fieldData'];
+        userOptions['channelName'] = obj['detail']['channel']['username'];
+        userOptions['otherUsers'] = (userOptions['otherUsers'].toLowerCase()).replace(/\s/g, '').split(",");
+        $("#image").hide();
+        $("#playCountTable").hide(); // Hide play count table on load
+        allowed = true;
+    });
+
+let image1 = document.getElementById("image1");
+image1.src = "//cdn.streamelements.com/uploads/image1.png";
+
+    window.addEventListener('onEventReceived', function (obj) {
+        if (obj.detail.listener !== 'message') return;
+        let data = obj.detail.event.data;
+        let message = data['text'].toLowerCase();
+
+        if (message !== userOptions['command1']) return; // Check if message is the specified command
+
+        let user = data['nick'].toLowerCase();
+
+        // Setting allowed to true to allow everyone to use the command
+        allowed = true;
+
+        let image = $("#image");
+        let source = getRandomImageSrc();
+
+        // Display Image 1 for 2 seconds before changing to random image
+        image.attr('src', 'https://cdn.streamelements.com/uploads/18d595f0-cbe5-401c-a03d-76908dd455b2.png');
+        image.attr('alt', 'Fishing');
+        showImage();
+        setTimeout(function () {
+            image.attr('src', source);
+            image.attr('alt', 'Random Image');
+            updatePlayCount('image' + (randomImageIndex + 1) + 'Count');
+            setTimeout(hideImage, 2000); // Hide image after 2 seconds
+            setTimeout(function () {
+                showPlayCountTable(); // Show play count table after image displays
+                setTimeout(hidePlayCountTable, 5000); // Hide play count table after 5 seconds
+            }, 2000); // Display play count table after 2 seconds
+        }, 2000); // Display Image 1 for 2 seconds
+    });
+
+    function getRandomImageSrc() {
+        let imageOptions = [
+            userOptions['image1'],
+            userOptions['image2'],
+            userOptions['image3'],
+            userOptions['image4'],
+            userOptions['image5'],
+            userOptions['image6'],
+            userOptions['image7'],
+            userOptions['image8']
+        ];
+        randomImageIndex = Math.floor(Math.random() * imageOptions.length);
+        return imageOptions[randomImageIndex];
+    }
+
+    function updatePlayCount(imageId) {
+        let playCountElement = document.getElementById(imageId);
+        if (playCountElement) {
+            let currentCount = parseInt(playCountElement.textContent);
+            playCountElement.textContent = (currentCount + 1).toString();
+        } else {
+            console.error("Play count element not found for ID:", imageId);
+        }
+    }
+
+    function showImage() {
+        let image = $("#image");
+        image.show();
+    }
+
+    function hideImage() {
+        $("#image").hide();
+    }
+
+    function showPlayCountTable() {
+        $("#playCountTable").show();
+    }
+
+    function hidePlayCountTable() {
+        $("#playCountTable").hide();
+    }
